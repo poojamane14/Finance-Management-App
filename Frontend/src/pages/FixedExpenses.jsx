@@ -1,9 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function FixedExpenses() {
   const [expenseName, setExpenseName] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
   const [expenses, setExpenses] = useState([]);
+  const [budget, setBudget] = useState("");
+
+  useEffect(() => {
+  const savedExpenses = localStorage.getItem("expenses");
+
+  if (savedExpenses) {
+    setExpenses(JSON.parse(savedExpenses));
+  }
+}, []);
+
+useEffect(() => {
+  const savedBudget = localStorage.getItem("budget");
+
+  if (savedBudget) {
+    setBudget(JSON.parse(savedBudget));
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem(
+    "budget",
+    JSON.stringify(budget)
+  );
+}, [budget]);
+
+ useEffect(() => {
+  localStorage.setItem(
+    "expenses",
+    JSON.stringify(expenses)
+  );
+}, [expenses]);
 
   const addExpense = () => {
     if (expenseName === "" || expenseAmount === "") {
@@ -34,6 +65,8 @@ const deleteExpense = (indexToDelete) => {
     0
   );
 
+  const remainingBalance = budget - totalExpenses;
+
   return (
     <div className="p-6">
 
@@ -41,6 +74,54 @@ const deleteExpense = (indexToDelete) => {
       <h1 className="text-3xl font-bold mb-8">
         Fixed Expenses
       </h1>
+      
+       <div className="bg-white p-6 rounded-2xl shadow-md mb-8 max-w-md">
+
+  <h2 className="text-xl font-bold mb-4">
+    Set Fixed Expense Budget
+  </h2>
+
+  <input
+    type="number"
+    placeholder="Enter Budget Amount"
+    value={budget}
+    onChange={(e) => setBudget(Number(e.target.value))}
+    className="border p-3 rounded-lg outline-none w-full"
+  />
+
+</div>
+
+<div className="flex gap-6 flex-wrap mb-8">
+
+  {/* Budget Card */}
+  <div className="bg-blue-500 text-white p-6 rounded-2xl shadow-md w-64">
+    <h2 className="text-lg">Total Budget</h2>
+
+    <h1 className="text-3xl font-bold mt-3">
+      ₹ {budget}
+    </h1>
+  </div>
+
+  {/* Spent Card */}
+  <div className="bg-red-500 text-white p-6 rounded-2xl shadow-md w-64">
+    <h2 className="text-lg">Total Spent</h2>
+
+    <h1 className="text-3xl font-bold mt-3">
+      ₹ {totalExpenses}
+    </h1>
+  </div>
+
+  {/* Remaining Card */}
+  <div className="bg-green-500 text-white p-6 rounded-2xl shadow-md w-64">
+    <h2 className="text-lg">Remaining Balance</h2>
+
+    <h1 className="text-3xl font-bold mt-3">
+      ₹ {remainingBalance}
+    </h1>
+  </div>
+
+</div>
+
 
       {/* MAIN CONTAINER */}
       <div className="flex gap-8 items-start flex-wrap">
