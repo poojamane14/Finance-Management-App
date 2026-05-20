@@ -2,13 +2,15 @@ import { Routes, Route } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
-
+import VaryingExpenses from "./pages/VaryingExpenses";
+<Route path="/varying-expenses" element={<VaryingExpenses />} />
 import Dashboard from "./pages/Dashboard";
 import FixedExpenses from "./pages/FixedExpenses";
-import VariableExpenses from "./pages/VariableExpenses";
+import VariableExpenses from "./pages/VaryingExpenses";
 import Savings from "./pages/Savings";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
+<Route path="/savings" element={<Savings />} />
 
 function App() {
   return (
@@ -31,8 +33,8 @@ function App() {
           />
 
           <Route
-            path="/variable-expenses"
-            element={<VariableExpenses />}
+            path="/varying-expenses"
+            element={<VaryingExpenses />}
           />
 
           <Route

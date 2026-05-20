@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 
-function Savings() {
+function VaryingExpenses() {
   const [expenseName, setExpenseName] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
   const [varyingExpenses, setExpenses] = useState([]);
   const [varyingBudget, setBudget] = useState("");
 
   useEffect(() => {
-  const savedExpenses = localStorage.getItem("savingsData");
+  const savedExpenses = localStorage.getItem("varyingExpenses");
 
   if (savedExpenses) {
     setExpenses(JSON.parse(savedExpenses));
@@ -15,7 +15,7 @@ function Savings() {
 }, []);
 
 useEffect(() => {
-  const savedBudget = localStorage.getItem("savingsGoal");
+  const savedBudget = localStorage.getItem("varyingBudget");
 
   if (savedBudget) {
     setBudget(JSON.parse(savedBudget));
@@ -24,14 +24,14 @@ useEffect(() => {
 
 useEffect(() => {
   localStorage.setItem(
-    "savingsGoal",
+    "varyingBudget",
     JSON.stringify(varyingBudget)
   );
 }, [varyingBudget]);
 
  useEffect(() => {
   localStorage.setItem(
-    "savingsData",
+    "varyingExpenses",
     JSON.stringify(varyingExpenses)
   );
 }, [varyingExpenses]);
@@ -72,18 +72,18 @@ const deleteExpense = (indexToDelete) => {
 
       {/* Page Title */}
       <h1 className="text-3xl font-bold mb-8">
-        Savings
+        Varying Expenses
       </h1>
       
        <div className="bg-white p-6 rounded-2xl shadow-md mb-8 max-w-md">
 
   <h2 className="text-xl font-bold mb-4">
-    Set Savings Goal
+    Set Varying Expense Budget
   </h2>
 
   <input
     type="number"
-    placeholder="Enter Savings Goal Amount"
+    placeholder="Enter Budget Amount"
     value={varyingBudget}
     onChange={(e) => setBudget(Number(e.target.value))}
     className="border p-3 rounded-lg outline-none w-full"
@@ -95,7 +95,7 @@ const deleteExpense = (indexToDelete) => {
 
   {/* Budget Card */}
   <div className="bg-blue-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Total Savings Goal</h2>
+    <h2 className="text-lg">Total Budget</h2>
 
     <h1 className="text-3xl font-bold mt-3">
       ₹ {varyingBudget}
@@ -104,7 +104,7 @@ const deleteExpense = (indexToDelete) => {
 
   {/* Spent Card */}
   <div className="bg-red-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Total Saved</h2>
+    <h2 className="text-lg">Total Spent</h2>
 
     <h1 className="text-3xl font-bold mt-3">
       ₹ {totalExpenses}
@@ -113,7 +113,7 @@ const deleteExpense = (indexToDelete) => {
 
   {/* Remaining Card */}
   <div className="bg-green-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Need to Save</h2>
+    <h2 className="text-lg">Remaining Balance</h2>
 
     <h1 className="text-3xl font-bold mt-3">
       ₹ {remainingBalance}
@@ -130,14 +130,14 @@ const deleteExpense = (indexToDelete) => {
         <div className="bg-white p-6 rounded-2xl shadow-md w-full max-w-xl flex-1 h-[400px] flex flex-col">
 
           <h2 className="text-xl font-bold mb-4">
-            Add Savings
+            Add Expense
           </h2>
 
           <div className="flex flex-col gap-4">
 
             <input
               type="text"
-              placeholder="Enter Savings source"
+              placeholder="Enter Expense Name"
               value={expenseName}
               onChange={(e) => setExpenseName(e.target.value)}
               className="border p-3 rounded-lg outline-none"
@@ -155,7 +155,7 @@ const deleteExpense = (indexToDelete) => {
               onClick={addExpense}
               className="bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition duration-300"
             >
-              Add Savings
+              Add Expense
             </button>
 
           </div>
@@ -164,7 +164,7 @@ const deleteExpense = (indexToDelete) => {
         {/* RIGHT SIDE - EXPENSE LIST */}
          <div className="bg-white p-6 rounded-2xl shadow-md w-full max-w-xl flex-1 h-[420px] flex flex-col min-h-0">
           <h2 className="text-2xl font-bold mb-5">
-            Saving List
+            Expense List
           </h2>
 
           {varyingExpenses.length === 0 ? (
@@ -202,7 +202,7 @@ const deleteExpense = (indexToDelete) => {
 
           {/* TOTAL */}
           <div className="mt-6 text-xl font-bold">
-            Total Savings: ₹ {totalExpenses}
+            Total Expenses: ₹ {totalExpenses}
           </div>
 
         </div>
@@ -212,4 +212,4 @@ const deleteExpense = (indexToDelete) => {
   );
 }
 
-export default Savings;
+export default VaryingExpenses;

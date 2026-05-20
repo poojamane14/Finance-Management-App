@@ -34,10 +34,10 @@ function Sidebar() {
           </li>
         </Link>
 
-        <Link to="/variable-expenses">
+        <Link to="/varying-expenses">
           <li className="flex items-center gap-3 hover:text-green-400 cursor-pointer transition duration-300">
             <FaMoneyBill />
-            Variable Expenses
+            Varying Expenses
           </li>
         </Link>
 
@@ -61,6 +61,14 @@ function Sidebar() {
             Profile
           </li>
         </Link>
+
+        <Link to="/varying-expenses">
+  Varying Expenses
+</Link>
+
+<Link to="/savings">
+  Savings
+</Link>
 
       </ul>
 
