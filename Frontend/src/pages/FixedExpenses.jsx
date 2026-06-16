@@ -4,7 +4,7 @@ function FixedExpenses() {
   const [expenseName, setExpenseName] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
   const [expenses, setExpenses] = useState([]);
-  const [budget, setBudget] = useState("");
+  const [fixedBudget, setBudget] = useState("");
 
   useEffect(() => {
   const savedExpenses = localStorage.getItem("expenses");
@@ -15,7 +15,7 @@ function FixedExpenses() {
 }, []);
 
 useEffect(() => {
-  const savedBudget = localStorage.getItem("budget");
+  const savedBudget = localStorage.getItem("fixedBudget");
 
   if (savedBudget) {
     setBudget(JSON.parse(savedBudget));
@@ -24,14 +24,14 @@ useEffect(() => {
 
 useEffect(() => {
   localStorage.setItem(
-    "budget",
-    JSON.stringify(budget)
+    "fixedBudget",
+    JSON.stringify(fixedBudget)
   );
-}, [budget]);
+}, [fixedBudget]);
 
  useEffect(() => {
   localStorage.setItem(
-    "expenses",
+    "fixedExpenses",
     JSON.stringify(expenses)
   );
 }, [expenses]);
@@ -60,12 +60,12 @@ const deleteExpense = (indexToDelete) => {
   );
 };
 
-  const totalExpenses = expenses.reduce(
+  const totalFixedSpent = expenses.reduce(
     (total, expense) => total + expense.amount,
     0
   );
 
-  const remainingBalance = budget - totalExpenses;
+  const remainingBalance = fixedBudget - totalFixedSpent;
 
   return (
     <div className="p-6">
@@ -84,7 +84,7 @@ const deleteExpense = (indexToDelete) => {
   <input
     type="number"
     placeholder="Enter Budget Amount"
-    value={budget}
+    value={fixedBudget}
     onChange={(e) => setBudget(Number(e.target.value))}
     className="border p-3 rounded-lg outline-none w-full"
   />
@@ -95,25 +95,25 @@ const deleteExpense = (indexToDelete) => {
 
   {/* Budget Card */}
   <div className="bg-blue-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Total Budget</h2>
+    <h2 className="text-lg">Total Fixed Budget</h2>
 
     <h1 className="text-3xl font-bold mt-3">
-      ₹ {budget}
+      ₹ {fixedBudget}
     </h1>
   </div>
 
   {/* Spent Card */}
   <div className="bg-red-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Total Spent</h2>
+    <h2 className="text-lg">Total Fixed Spent</h2>
 
     <h1 className="text-3xl font-bold mt-3">
-      ₹ {totalExpenses}
+      ₹ {totalFixedSpent}
     </h1>
   </div>
 
   {/* Remaining Card */}
   <div className="bg-green-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Remaining Balance</h2>
+    <h2 className="text-lg">Remaining Fixed Balance</h2>
 
     <h1 className="text-3xl font-bold mt-3">
       ₹ {remainingBalance}
@@ -202,7 +202,7 @@ const deleteExpense = (indexToDelete) => {
 
           {/* TOTAL */}
           <div className="mt-6 text-xl font-bold">
-            Total Expenses: ₹ {totalExpenses}
+            Total Expenses: ₹ {totalFixedSpent}
           </div>
 
         </div>

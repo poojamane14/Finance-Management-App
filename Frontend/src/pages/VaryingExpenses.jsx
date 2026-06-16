@@ -60,12 +60,12 @@ const deleteExpense = (indexToDelete) => {
   );
 };
 
-  const totalExpenses = varyingExpenses.reduce(
+  const totalVaryingSpent = varyingExpenses.reduce(
     (total, varyingExpense) => total + varyingExpense.amount,
     0
   );
 
-  const remainingBalance = varyingBudget - totalExpenses;
+  const remainingBalance = varyingBudget - totalVaryingSpent;
 
   return (
     <div className="p-6">
@@ -95,7 +95,7 @@ const deleteExpense = (indexToDelete) => {
 
   {/* Budget Card */}
   <div className="bg-blue-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Total Budget</h2>
+    <h2 className="text-lg">Total Varying Budget</h2>
 
     <h1 className="text-3xl font-bold mt-3">
       ₹ {varyingBudget}
@@ -104,16 +104,16 @@ const deleteExpense = (indexToDelete) => {
 
   {/* Spent Card */}
   <div className="bg-red-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Total Spent</h2>
+    <h2 className="text-lg">Total Varying Spent</h2>
 
     <h1 className="text-3xl font-bold mt-3">
-      ₹ {totalExpenses}
+      ₹ {totalVaryingSpent}
     </h1>
   </div>
 
   {/* Remaining Card */}
   <div className="bg-green-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Remaining Balance</h2>
+    <h2 className="text-lg">Remaining Varying Balance</h2>
 
     <h1 className="text-3xl font-bold mt-3">
       ₹ {remainingBalance}
@@ -202,7 +202,7 @@ const deleteExpense = (indexToDelete) => {
 
           {/* TOTAL */}
           <div className="mt-6 text-xl font-bold">
-            Total Expenses: ₹ {totalExpenses}
+            Total Expenses: ₹ {totalVaryingSpent}
           </div>
 
         </div>

@@ -4,7 +4,7 @@ function Savings() {
   const [expenseName, setExpenseName] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
   const [varyingExpenses, setExpenses] = useState([]);
-  const [varyingBudget, setBudget] = useState("");
+  const [savingsGoal, setBudget] = useState("");
 
   useEffect(() => {
   const savedExpenses = localStorage.getItem("savingsData");
@@ -25,9 +25,9 @@ useEffect(() => {
 useEffect(() => {
   localStorage.setItem(
     "savingsGoal",
-    JSON.stringify(varyingBudget)
+    JSON.stringify(savingsGoal)
   );
-}, [varyingBudget]);
+}, [savingsGoal]);
 
  useEffect(() => {
   localStorage.setItem(
@@ -60,12 +60,12 @@ const deleteExpense = (indexToDelete) => {
   );
 };
 
-  const totalExpenses = varyingExpenses.reduce(
+  const totalSaved = varyingExpenses.reduce(
     (total, varyingExpense) => total + varyingExpense.amount,
     0
   );
 
-  const remainingBalance = varyingBudget - totalExpenses;
+  const remainingBalance = savingsGoal - totalSaved;
 
   return (
     <div className="p-6">
@@ -84,7 +84,7 @@ const deleteExpense = (indexToDelete) => {
   <input
     type="number"
     placeholder="Enter Savings Goal Amount"
-    value={varyingBudget}
+    value={savingsGoal}
     onChange={(e) => setBudget(Number(e.target.value))}
     className="border p-3 rounded-lg outline-none w-full"
   />
@@ -95,10 +95,10 @@ const deleteExpense = (indexToDelete) => {
 
   {/* Budget Card */}
   <div className="bg-blue-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Total Savings Goal</h2>
+    <h2 className="text-lg">Savings Goal</h2>
 
     <h1 className="text-3xl font-bold mt-3">
-      ₹ {varyingBudget}
+      ₹ {savingsGoal}
     </h1>
   </div>
 
@@ -107,7 +107,7 @@ const deleteExpense = (indexToDelete) => {
     <h2 className="text-lg">Total Saved</h2>
 
     <h1 className="text-3xl font-bold mt-3">
-      ₹ {totalExpenses}
+      ₹ {totalSaved}
     </h1>
   </div>
 
@@ -202,7 +202,7 @@ const deleteExpense = (indexToDelete) => {
 
           {/* TOTAL */}
           <div className="mt-6 text-xl font-bold">
-            Total Savings: ₹ {totalExpenses}
+            Total Savings: ₹ {totalSaved}
           </div>
 
         </div>

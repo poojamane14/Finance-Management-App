@@ -15,7 +15,7 @@ function Sidebar() {
     <div className="w-64 h-screen bg-gray-900 text-white p-6">
 
       <h1 className="text-3xl font-bold text-green-400 mb-12">
-        Finova
+        VaultIQ
       </h1>
 
       <ul className="space-y-6 text-lg">
@@ -61,14 +61,6 @@ function Sidebar() {
             Profile
           </li>
         </Link>
-
-        <Link to="/varying-expenses">
-  Varying Expenses
-</Link>
-
-<Link to="/savings">
-  Savings
-</Link>
 
       </ul>
 
