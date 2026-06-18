@@ -6,18 +6,37 @@ import {
   Legend,
 } from "recharts";
 
-function ExpenseChart() {
+function ExpenseChart({
+  fixedBudget,
+  varyingBudget,
+  savingsGoal,
+  remainingAmount
+}) {
 
   const data = [
-    { name: "Fixed Expenses", value: 20000 },
-    { name: "Variable Expenses", value: 30000 },
-    { name: "Savings", value: 50000 },
-  ];
+  {
+    name: "Fixed Expenses Budget",
+    value: fixedBudget,
+  },
+  {
+    name: "Varying Expenses Budget",
+    value: varyingBudget,
+  },
+  {
+    name: "Savings Goal",
+    value: savingsGoal,
+  },
+  {
+    name: "Remaining Amount",
+    value: remainingAmount,
+  },
+];
 
   const COLORS = [
     "#ef4444",
     "#f97316",
     "#22c55e",
+    "#d522cc"
   ];
 
   return (
@@ -25,7 +44,7 @@ function ExpenseChart() {
     <div className="bg-white p-6 rounded-2xl shadow-md mt-10 w-fit">
 
       <h1 className="text-2xl font-bold mb-6">
-        Expense Distribution
+        Income Distribution
       </h1>
 
       <PieChart width={400} height={300}>

@@ -1,6 +1,16 @@
 import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
+
+  const navigate = useNavigate();
+
+const handleLogout = () => {
+  localStorage.removeItem("isLoggedIn");
+  navigate("/login");
+};
+
+
   return (
 
     <div className="bg-white p-4 rounded-xl shadow-md flex justify-between items-center mb-6">
@@ -26,6 +36,13 @@ function Navbar() {
         <FaBell className="text-2xl cursor-pointer text-gray-600" />
 
         <FaUserCircle className="text-3xl cursor-pointer text-gray-600" />
+
+        <button
+  onClick={handleLogout}
+  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+>
+  Logout
+</button>
 
       </div>
 

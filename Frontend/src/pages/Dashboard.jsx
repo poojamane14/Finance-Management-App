@@ -87,7 +87,7 @@ const savingsPercentage =
     ? (totalSaved / savingsGoal) * 100
     : 0;
 
-  const remainingBalance =
+  const remainingAmount =
   income - fixedBudget - varyingBudget - savingsGoal;
 
   return (
@@ -145,8 +145,8 @@ const savingsPercentage =
         />
 
         <SummaryCard
-          title="Remaining Balance"
-          amount={remainingBalance}
+          title="Remaining Amount"
+          amount={remainingAmount}
           color="bg-purple-500"
           icon={<FaMoneyBillWave />}
         />
@@ -220,7 +220,12 @@ const savingsPercentage =
 
 </div>
 
-      <ExpenseChart />
+      <ExpenseChart 
+      fixedBudget={fixedBudget}
+      varyingBudget={varyingBudget}
+      savingsGoal={savingsGoal}
+      remainingAmount={remainingAmount}
+  />
 
     </div>
   );
