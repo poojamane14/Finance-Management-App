@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 
 function Savings() {
-  const [expenseName, setExpenseName] = useState("");
-  const [expenseAmount, setExpenseAmount] = useState("");
-  const [varyingExpenses, setExpenses] = useState([]);
-  const [savingsGoal, setBudget] = useState("");
+  const [savingName, setSavingName] = useState("");
+  const [savingAmount, setSavingAmount] = useState("");
+  const [savingsData, setSavingsData] = useState([]);
+  const [savingsGoal, setSavingsGoal] = useState("");
 
   useEffect(() => {
-  const savedExpenses = localStorage.getItem("savingsData");
+  const savedSavings = localStorage.getItem("savingsData");
 
-  if (savedExpenses) {
-    setExpenses(JSON.parse(savedExpenses));
+  if (savedSavings) {
+    setSavingsData(JSON.parse(savedSavings));
   }
 }, []);
 
@@ -18,7 +18,7 @@ useEffect(() => {
   const savedBudget = localStorage.getItem("savingsGoal");
 
   if (savedBudget) {
-    setBudget(JSON.parse(savedBudget));
+    setSavingsGoal(JSON.parse(savedBudget));
   }
 }, []);
 
@@ -32,36 +32,39 @@ useEffect(() => {
  useEffect(() => {
   localStorage.setItem(
     "savingsData",
-    JSON.stringify(varyingExpenses)
+    JSON.stringify(savingsData)
   );
-}, [varyingExpenses]);
+}, [savingsData]);
 
-  const addExpense = () => {
-    if (expenseName === "" || expenseAmount === "") {
+  const addSaving = () => {
+    if (savingName === "" || savingAmount === "") {
       alert("Please fill all fields");
       return;
     }
 
-    const newExpense = {
-      name: expenseName,
-      amount: Number(expenseAmount),
-    };
- setExpenses([...varyingExpenses, newExpense]);
+    const newSaving = {
+      name: savingName,
+      amount: Number(savingAmount),
+        createdAt: new Date().toISOString(),
 
-  setExpenseName("");
-  setExpenseAmount("");
+    };
+
+ setSavingsData([...savingsData, newSaving]);
+
+  setSavingName("");
+  setSavingAmount("");
 };
 
-const deleteExpense = (indexToDelete) => {
+const deleteSaving = (indexToDelete) => {
   console.log("DELETE CLICKED:", indexToDelete);
 
-  setExpenses((prevExpenses) =>
-    prevExpenses.filter((_, index) => index !== indexToDelete)
+  setSavingsData((prevSavings) =>
+    prevSavings.filter((_, index) => index !== indexToDelete)
   );
 };
 
-  const totalSaved = varyingExpenses.reduce(
-    (total, varyingExpense) => total + varyingExpense.amount,
+  const totalSaved = savingsData.reduce(
+    (total, saving) => total + saving.amount,
     0
   );
 
@@ -85,7 +88,7 @@ const deleteExpense = (indexToDelete) => {
     type="number"
     placeholder="Enter Savings Goal Amount"
     value={savingsGoal}
-    onChange={(e) => setBudget(Number(e.target.value))}
+    onChange={(e) => setSavingsGoal(Number(e.target.value))}
     className="border p-3 rounded-lg outline-none w-full"
   />
 
@@ -138,21 +141,21 @@ const deleteExpense = (indexToDelete) => {
             <input
               type="text"
               placeholder="Enter Savings source"
-              value={expenseName}
-              onChange={(e) => setExpenseName(e.target.value)}
+              value={savingName}
+              onChange={(e) => setSavingName(e.target.value)}
               className="border p-3 rounded-lg outline-none"
             />
 
             <input
               type="number"
               placeholder="Enter Amount"
-              value={expenseAmount}
-              onChange={(e) => setExpenseAmount(e.target.value)}
+              value={savingAmount}
+              onChange={(e) => setSavingAmount(e.target.value)}
               className="border p-3 rounded-lg outline-none"
             />
 
             <button
-              onClick={addExpense}
+              onClick={addSaving}
               className="bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition duration-300"
             >
               Add Savings
@@ -167,26 +170,37 @@ const deleteExpense = (indexToDelete) => {
             Saving List
           </h2>
 
-          {varyingExpenses.length === 0 ? (
+          {savingsData.length === 0 ? (
             <p className="text-gray-500">
-              No expenses added yet.
+              No savings added yet.
             </p>
           ) : (
             <div className="space-y-4 overflow-y-auto flex-1 pr-2 min-h-0">
 
-              {varyingExpenses.map((varyingExpense, index) => (
-                <div className="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
+              {savingsData.map((saving, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
 
-  <div>
-    <h3 className="font-medium">{varyingExpense.name}</h3>
+  <div
+  >
+    <h3 className="font-medium">{saving.name}</h3>
+    <p className="text-sm text-gray-500">
+    {saving.createdAt &&
+      `📅 ${new Date(saving.createdAt).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })}`}
+  </p>
   </div>
 
   <div className="flex items-center gap-4">
 
-    <h3 className="font-semibold">₹ {varyingExpense.amount}</h3>
+    <h3 className="font-semibold">₹ {saving.amount}</h3>
 
     <button
-      onClick={() => deleteExpense(index)}
+      onClick={() => deleteSaving(index)}
       className="text-red-500 hover:text-red-700 text-xl"
     >
       🗑

@@ -45,7 +45,9 @@ useEffect(() => {
     const newExpense = {
       name: expenseName,
       amount: Number(expenseAmount),
+        createdAt: new Date().toISOString(),
     };
+
  setExpenses([...varyingExpenses, newExpense]);
 
   setExpenseName("");
@@ -175,10 +177,20 @@ const deleteExpense = (indexToDelete) => {
             <div className="space-y-4 overflow-y-auto flex-1 pr-2 min-h-0">
 
               {varyingExpenses.map((varyingExpense, index) => (
-                <div className="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
+                <div 
+                key={index}
+                className="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
 
   <div>
     <h3 className="font-medium">{varyingExpense.name}</h3>
+     <p className="text-sm text-gray-500">
+    {varyingExpense.createdAt &&
+      `📅 ${new Date(varyingExpense.createdAt).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })}`}
+  </p>
   </div>
 
   <div className="flex items-center gap-4">

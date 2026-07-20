@@ -1,15 +1,38 @@
+import { useEffect, useState } from "react";
 import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 function Navbar() {
 
+  const loadUser = () => {
+  const savedUser = JSON.parse(localStorage.getItem("user"));
+
+  if (savedUser) {
+    setUserName(savedUser.name);
+  }
+};
+
+  const [userName, setUserName] = useState("");
+
+ useEffect(() => {
+  loadUser();
+
+  window.addEventListener("userUpdated", loadUser);
+
+  return () => {
+    window.removeEventListener("userUpdated", loadUser);
+  };
+}, []);
+
   const navigate = useNavigate();
 
+  const goToProfile = () => {
+  navigate("/profile");
+};
 const handleLogout = () => {
   localStorage.removeItem("isLoggedIn");
   navigate("/login");
 };
-
 
   return (
 
@@ -35,8 +58,13 @@ const handleLogout = () => {
 
         <FaBell className="text-2xl cursor-pointer text-gray-600" />
 
-        <FaUserCircle className="text-3xl cursor-pointer text-gray-600" />
-
+        <div
+  onClick={goToProfile}
+  className="flex items-center gap-2 cursor-pointer hover:text-blue-500 transition"
+>
+  <FaUserCircle className="text-3xl text-gray-600" />
+  <span className="font-medium">{userName || "User"}</span>
+</div>
         <button
   onClick={handleLogout}
   className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"

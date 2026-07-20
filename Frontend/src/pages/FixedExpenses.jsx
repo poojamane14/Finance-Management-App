@@ -7,7 +7,7 @@ function FixedExpenses() {
   const [fixedBudget, setBudget] = useState("");
 
   useEffect(() => {
-  const savedExpenses = localStorage.getItem("expenses");
+  const savedExpenses = localStorage.getItem("fixedExpenses");
 
   if (savedExpenses) {
     setExpenses(JSON.parse(savedExpenses));
@@ -43,9 +43,12 @@ useEffect(() => {
     }
 
     const newExpense = {
-      name: expenseName,
-      amount: Number(expenseAmount),
-    };
+  name: expenseName,
+  amount: Number(expenseAmount),
+  createdAt: new Date().toISOString(),
+};
+
+console.log(newExpense);
  setExpenses([...expenses, newExpense]);
 
   setExpenseName("");
@@ -175,11 +178,24 @@ const deleteExpense = (indexToDelete) => {
             <div className="space-y-4 overflow-y-auto flex-1 pr-2 min-h-0">
 
               {expenses.map((expense, index) => (
-                <div className="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
+                <div 
+                key={index}
+                className="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
 
-  <div>
-    <h3 className="font-medium">{expense.name}</h3>
-  </div>
+ <div>
+  <h3 className="font-medium">
+    {expense.name}
+  </h3>
+
+  <p className="text-sm text-gray-500">
+  {expense.createdAt &&
+    `📅 ${new Date(expense.createdAt).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })}`}
+</p>
+</div>
 
   <div className="flex items-center gap-4">
 

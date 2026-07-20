@@ -87,8 +87,12 @@ const savingsPercentage =
     ? (totalSaved / savingsGoal) * 100
     : 0;
 
-  const remainingAmount =
-  income - fixedBudget - varyingBudget - savingsGoal;
+  const remainingBalance =
+  income - totalFixedSpent - totalVaryingSpent - totalSaved;
+
+  const totalSpent =
+  income - remainingBalance;
+
 
   return (
 
@@ -124,8 +128,23 @@ const savingsPercentage =
         />
 
         <SummaryCard
+          title="Total Spent"
+          amount={totalSpent}
+          color="bg-purple-500"
+          icon={<FaMoneyBillWave />}
+        />
+
+        <SummaryCard
+          title="Remaining Balance"
+          amount={remainingBalance}
+          color="bg-teal-500"
+          icon={<FaMoneyBillWave />}
+        />
+
+        <SummaryCard
           title="Fixed Budget"
           amount={fixedBudget}
+          subtitle={`Spent: ₹${totalFixedSpent}`}
           color="bg-red-500"
           icon={<FaWallet />}
         />
@@ -133,6 +152,7 @@ const savingsPercentage =
         <SummaryCard
           title="Varying Budget"
           amount={varyingBudget}
+          subtitle={`Spent: ₹${totalVaryingSpent}`}
           color="bg-orange-500"
           icon={<FaChartLine />}
         />
@@ -140,16 +160,12 @@ const savingsPercentage =
         <SummaryCard
           title="Savings Goal"
           amount={savingsGoal}
+          subtitle={`Saved: ₹${totalSaved}`}
           color="bg-green-500"
           icon={<FaPiggyBank />}
         />
 
-        <SummaryCard
-          title="Remaining Amount"
-          amount={remainingAmount}
-          color="bg-purple-500"
-          icon={<FaMoneyBillWave />}
-        />
+        
 
       </div>
      
@@ -224,7 +240,7 @@ const savingsPercentage =
       fixedBudget={fixedBudget}
       varyingBudget={varyingBudget}
       savingsGoal={savingsGoal}
-      remainingAmount={remainingAmount}
+      totalSpent={totalSpent}
   />
 
     </div>
