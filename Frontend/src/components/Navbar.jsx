@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 function Navbar() {
 
   const loadUser = () => {
-  const savedUser = JSON.parse(localStorage.getItem("user"));
+  const savedUser = JSON.parse(localStorage.getItem("currentUser"));
 
   if (savedUser) {
     setUserName(savedUser.name);
@@ -29,8 +29,10 @@ function Navbar() {
   const goToProfile = () => {
   navigate("/profile");
 };
+
 const handleLogout = () => {
   localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("currentUser");
   navigate("/login");
 };
 

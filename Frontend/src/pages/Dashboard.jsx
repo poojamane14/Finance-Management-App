@@ -20,33 +20,34 @@ const [varyingExpenses, setVaryingExpenses] = useState([]);
 const [savingsData, setSavingsData] = useState([]);
 
 useEffect(() => {
-  setIncome(
-  JSON.parse(localStorage.getItem("monthlyIncome")) || 0
-);
 
-  setFixedBudget(
-    JSON.parse(localStorage.getItem("fixedBudget")) || 0
+  const savedUser = JSON.parse(
+    localStorage.getItem("currentUser")
   );
 
-  setVaryingBudget(
-    JSON.parse(localStorage.getItem("varyingBudget")) || 0
-  );
+  if (!savedUser) {
+    return;
+  }
 
-  setSavingsGoal(
-    JSON.parse(localStorage.getItem("savingsGoal")) || 0
-  );
-  
-  setFixedExpenses(
-  JSON.parse(localStorage.getItem("fixedExpenses")) || []
-);
+  fetch(
+    `http://127.0.0.1:5000/api/dashboard/${savedUser.id}`
+  )
+    .then((response) => response.json())
+    .then((data) => {
 
-setVaryingExpenses(
-  JSON.parse(localStorage.getItem("varyingExpenses")) || []
-);
+      console.log("Dashboard data:", data);
 
-setSavingsData(
-  JSON.parse(localStorage.getItem("savingsData")) || []
-);
+      setFixedExpenses(data.fixed_expenses || []);
+      setVaryingExpenses(data.varying_expenses || []);
+      setSavingsData(data.savings || []);
+
+    })
+    .catch((error) => {
+      console.error(
+        "Error loading dashboard data:",
+        error
+      );
+    });
 
 }, []);
 

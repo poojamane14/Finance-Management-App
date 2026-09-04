@@ -6,13 +6,6 @@ function FixedExpenses() {
   const [expenses, setExpenses] = useState([]);
   const [fixedBudget, setBudget] = useState("");
 
-  useEffect(() => {
-  const savedExpenses = localStorage.getItem("fixedExpenses");
-
-  if (savedExpenses) {
-    setExpenses(JSON.parse(savedExpenses));
-  }
-}, []);
 
 useEffect(() => {
   const savedBudget = localStorage.getItem("fixedBudget");
@@ -29,31 +22,108 @@ useEffect(() => {
   );
 }, [fixedBudget]);
 
- useEffect(() => {
-  localStorage.setItem(
-    "fixedExpenses",
-    JSON.stringify(expenses)
-  );
-}, [expenses]);
+const addExpense = async () => {
 
-  const addExpense = () => {
-    if (expenseName === "" || expenseAmount === "") {
-      alert("Please fill all fields");
+  if (expenseName === "" || expenseAmount === "") {
+    alert("Please fill all fields");
+    return;
+  }
+
+  const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
+  );
+
+  if (!currentUser) {
+    alert("Please login first.");
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "http://127.0.0.1:5000/api/fixed-expenses",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          amount: Number(expenseAmount),
+          merchant: expenseName,
+          description: expenseName
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Failed to add expense");
       return;
     }
 
-    const newExpense = {
-  name: expenseName,
-  amount: Number(expenseAmount),
-  createdAt: new Date().toISOString(),
+    alert("Expense added successfully!");
+
+    setExpenseName("");
+    setExpenseAmount("");
+
+    loadExpenses();
+
+  } catch (error) {
+
+    console.error("Add expense error:", error);
+
+    alert("Unable to connect to server.");
+
+  }
 };
 
-console.log(newExpense);
- setExpenses([...expenses, newExpense]);
+const loadExpenses = async () => {
 
-  setExpenseName("");
-  setExpenseAmount("");
+  const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
+  );
+
+  if (!currentUser) {
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      `http://127.0.0.1:5000/api/fixed-expenses/${currentUser.id}`
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+
+      const formattedExpenses = data.map((expense) => ({
+        id: expense.id,
+        name: expense.merchant,
+        amount: expense.amount,
+        createdAt: expense.created_at
+      }));
+
+      setExpenses(formattedExpenses);
+
+    } else {
+
+      console.error(data.error);
+
+    }
+
+  } catch (error) {
+
+    console.error("Load expenses error:", error);
+
+  }
 };
+
+useEffect(() => {
+  loadExpenses();
+}, []);
 
 const deleteExpense = (indexToDelete) => {
   console.log("DELETE CLICKED:", indexToDelete);

@@ -7,27 +7,57 @@ function Login() {
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
-  const handleLogin = () => {
+ const handleLogin = async () => {
 
-  const savedUser = JSON.parse(
-    localStorage.getItem("user")
-  );
-
-  if (!savedUser) {
-    alert("No user found. Please register first.");
+  if (email === "" || password === "") {
+    alert("Please enter email and password.");
     return;
   }
 
-  if (
-    email === savedUser.email &&
-    password === savedUser.password
-  ) {
-    localStorage.setItem("isLoggedIn", "true");
+  try {
 
-    alert("Login Successful!");
-    navigate("/");
-  } else {
-    alert("Invalid Email or Password");
+    const response = await fetch(
+      "http://127.0.0.1:5000/api/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+
+      // Save logged-in user
+      localStorage.setItem(
+        "currentUser",
+        JSON.stringify(data.user)
+      );
+
+      localStorage.setItem("isLoggedIn", "true");
+
+      alert("Login Successful!");
+
+      navigate("/");
+
+    } else {
+
+      alert(data.error);
+
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Unable to connect to server.");
+
   }
 
 };

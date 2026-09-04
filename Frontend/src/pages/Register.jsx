@@ -7,7 +7,7 @@ const [email, setEmail] = useState("");
 const [password, setPassword] = useState("");
 const [confirmPassword, setConfirmPassword] = useState("");
 
-const handleRegister = () => {
+const handleRegister = async () => {
 
   if (
     name === "" ||
@@ -24,19 +24,50 @@ const handleRegister = () => {
     return;
   }
 
-  const user = {
-    name,
-    email,
-    password,
-  };
+  try {
 
-  localStorage.setItem(
-    "user",
-    JSON.stringify(user)
-  );
+    const response = await fetch(
+      "http://127.0.0.1:5000/api/register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          password: password,
+        }),
+      }
+    );
 
-  alert("Registration Successful!");
+    const data = await response.json();
 
+    if (response.ok) {
+
+      alert("Registration Successful!");
+
+      // Clear form
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+
+    } else {
+
+      alert(data.error || "Registration failed");
+
+    }
+
+  } catch (error) {
+
+    console.error("Registration error:", error);
+
+    alert(
+      "Unable to connect to server. Please try again."
+    );
+
+  }
 };
 
 
