@@ -6,68 +6,253 @@ function VaryingExpenses() {
   const [varyingExpenses, setExpenses] = useState([]);
   const [varyingBudget, setBudget] = useState("");
 
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+  // Load varying expenses and varying budget
   useEffect(() => {
-  const savedExpenses = localStorage.getItem("varyingExpenses");
+    const currentUser = JSON.parse(
+      localStorage.getItem("currentUser")
+    );
 
-  if (savedExpenses) {
-    setExpenses(JSON.parse(savedExpenses));
+    if (!currentUser) {
+      return;
+    }
+
+    // Load varying expenses from MySQL
+    fetch(
+      `http://127.0.0.1:5000/api/varying-expenses/${currentUser.id}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Varying expenses:", data);
+
+        if (Array.isArray(data)) {
+          const formattedExpenses = data.map((expense) => ({
+            id: expense.id,
+            name: expense.merchant,
+            amount: expense.amount,
+            createdAt: expense.transaction_date,
+          }));
+
+          setExpenses(formattedExpenses);
+        }
+      })
+      .catch((error) => {
+        console.error("Error loading varying expenses:", error);
+      });
+
+    // Load varying budget from MySQL
+    // Load varying budget for the current month
+const now = new Date();
+const currentMonth = now.getMonth() + 1;
+const currentYear = now.getFullYear();
+
+fetch(
+  `http://127.0.0.1:5000/api/monthly-budget/${currentUser.id}/${currentYear}/${currentMonth}`
+)
+  .then((response) => response.json())
+  .then((data) => {
+    console.log("Monthly budget:", data);
+
+    if (data.varying_budget !== undefined) {
+      setBudget(data.varying_budget);
+    }
+
+    setProfileLoaded(true);
+  })
+  .catch((error) => {
+    console.error("Error loading monthly budget:", error);
+    setProfileLoaded(true);
+  });
+},[]);
+
+  // Save varying budget to MySQL
+  useEffect(() => {
+    if (!profileLoaded) {
+      return;
+    }
+
+    const currentUser = JSON.parse(
+      localStorage.getItem("currentUser")
+    );
+
+    if (!currentUser) {
+      return;
+    }
+
+    fetch(
+      "http://127.0.0.1:5000/api/financial-profile",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          varying_budget: varyingBudget,
+        }),
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Varying budget saved:", data);
+      })
+      .catch((error) => {
+        console.error("Error saving varying budget:", error);
+      });
+  }, [varyingBudget, profileLoaded]);
+
+  // Save varying budget for the current month
+const saveMonthlyVaryingBudget = async (budgetAmount) => {
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+  if (!currentUser) return;
+
+  const now = new Date();
+
+  try {
+    const response = await fetch(
+      "http://127.0.0.1:5000/api/monthly-budget",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: currentUser.id,
+
+          // JavaScript months are 0-11,
+          // database months are 1-12
+          month: now.getMonth() + 1,
+          year: now.getFullYear(),
+
+          varying_budget: budgetAmount,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Monthly varying budget save error:", data.error);
+      return;
+    }
+
+    console.log("Monthly varying budget saved:", data);
+  } catch (error) {
+    console.error(
+      "Error saving monthly varying budget:",
+      error
+    );
   }
-}, []);
+};
 
-useEffect(() => {
-  const savedBudget = localStorage.getItem("varyingBudget");
-
-  if (savedBudget) {
-    setBudget(JSON.parse(savedBudget));
-  }
-}, []);
-
-useEffect(() => {
-  localStorage.setItem(
-    "varyingBudget",
-    JSON.stringify(varyingBudget)
-  );
-}, [varyingBudget]);
-
- useEffect(() => {
-  localStorage.setItem(
-    "varyingExpenses",
-    JSON.stringify(varyingExpenses)
-  );
-}, [varyingExpenses]);
-
-  const addExpense = () => {
+  // Add expense
+  const addExpense = async () => {
     if (expenseName === "" || expenseAmount === "") {
       alert("Please fill all fields");
       return;
     }
 
-    const newExpense = {
-      name: expenseName,
-      amount: Number(expenseAmount),
-        createdAt: new Date().toISOString(),
-    };
+    const currentUser = JSON.parse(
+      localStorage.getItem("currentUser")
+    );
 
- setExpenses([...varyingExpenses, newExpense]);
+    if (!currentUser) {
+      alert("Please login first.");
+      return;
+    }
 
-  setExpenseName("");
-  setExpenseAmount("");
-};
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:5000/api/varying-expenses",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: currentUser.id,
+            amount: Number(expenseAmount),
+            merchant: expenseName,
+            description: "Varying expense",
+          }),
+        }
+      );
 
-const deleteExpense = (indexToDelete) => {
-  console.log("DELETE CLICKED:", indexToDelete);
+      const data = await response.json();
 
-  setExpenses((prevExpenses) =>
-    prevExpenses.filter((_, index) => index !== indexToDelete)
-  );
-};
+      if (response.ok) {
+        console.log("Expense added:", data);
+
+        // Reload expenses from MySQL
+        const expenseResponse = await fetch(
+          `http://127.0.0.1:5000/api/varying-expenses/${currentUser.id}`
+        );
+
+        const expenseData = await expenseResponse.json();
+
+        const formattedExpenses = expenseData.map((expense) => ({
+          id: expense.id,
+          name: expense.merchant,
+          amount: expense.amount,
+          createdAt: expense.transaction_date,
+        }));
+
+        setExpenses(formattedExpenses);
+
+        setExpenseName("");
+        setExpenseAmount("");
+
+        alert("Varying expense added successfully!");
+      } else {
+        alert(data.error || "Failed to add expense.");
+      }
+    } catch (error) {
+      console.error("Error adding expense:", error);
+      alert("Unable to connect to server.");
+    }
+  };
+
+  // Delete expense
+  const deleteExpense = async (transactionId) => {
+    console.log("DELETE CLICKED:", transactionId);
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/api/varying-expenses/${transactionId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Expense deleted:", data);
+
+        setExpenses((prevExpenses) =>
+          prevExpenses.filter(
+            (expense) => expense.id !== transactionId
+          )
+        );
+      } else {
+        alert(data.error || "Failed to delete expense.");
+      }
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      alert("Unable to connect to server.");
+    }
+  };
 
   const totalVaryingSpent = varyingExpenses.reduce(
-    (total, varyingExpense) => total + varyingExpense.amount,
+    (total, varyingExpense) =>
+      total + Number(varyingExpense.amount),
     0
   );
 
-  const remainingBalance = varyingBudget - totalVaryingSpent;
+  const remainingBalance =
+    Number(varyingBudget || 0) - totalVaryingSpent;
 
   return (
     <div className="p-6">
@@ -76,54 +261,68 @@ const deleteExpense = (indexToDelete) => {
       <h1 className="text-3xl font-bold mb-8">
         Varying Expenses
       </h1>
-      
-       <div className="bg-white p-6 rounded-2xl shadow-md mb-8 max-w-md">
 
-  <h2 className="text-xl font-bold mb-4">
-    Set Varying Expense Budget
-  </h2>
+      <div className="bg-white p-6 rounded-2xl shadow-md mb-8 max-w-md">
 
-  <input
-    type="number"
-    placeholder="Enter Budget Amount"
-    value={varyingBudget}
-    onChange={(e) => setBudget(Number(e.target.value))}
-    className="border p-3 rounded-lg outline-none w-full"
-  />
+        <h2 className="text-xl font-bold mb-4">
+          Set Varying Expense Budget
+        </h2>
 
-</div>
+        <input
+          type="number"
+          placeholder="Enter Budget Amount"
+          value={varyingBudget}
+          onChange={(e) => {const value = Number(e.target.value);
+          setBudget(value);
+          saveMonthlyVaryingBudget(value);
+          }}
+          className="border p-3 rounded-lg outline-none w-full"
+        />
 
-<div className="flex gap-6 flex-wrap mb-8">
+      </div>
 
-  {/* Budget Card */}
-  <div className="bg-blue-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Total Varying Budget</h2>
+      <div className="flex gap-6 flex-wrap mb-8">
 
-    <h1 className="text-3xl font-bold mt-3">
-      ₹ {varyingBudget}
-    </h1>
-  </div>
+        {/* Budget Card */}
+        <div className="bg-blue-500 text-white p-6 rounded-2xl shadow-md w-64">
 
-  {/* Spent Card */}
-  <div className="bg-red-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Total Varying Spent</h2>
+          <h2 className="text-lg">
+            Total Varying Budget
+          </h2>
 
-    <h1 className="text-3xl font-bold mt-3">
-      ₹ {totalVaryingSpent}
-    </h1>
-  </div>
+          <h1 className="text-3xl font-bold mt-3">
+            ₹ {varyingBudget}
+          </h1>
 
-  {/* Remaining Card */}
-  <div className="bg-green-500 text-white p-6 rounded-2xl shadow-md w-64">
-    <h2 className="text-lg">Remaining Varying Balance</h2>
+        </div>
 
-    <h1 className="text-3xl font-bold mt-3">
-      ₹ {remainingBalance}
-    </h1>
-  </div>
+        {/* Spent Card */}
+        <div className="bg-red-500 text-white p-6 rounded-2xl shadow-md w-64">
 
-</div>
+          <h2 className="text-lg">
+            Total Varying Spent
+          </h2>
 
+          <h1 className="text-3xl font-bold mt-3">
+            ₹ {totalVaryingSpent}
+          </h1>
+
+        </div>
+
+        {/* Remaining Card */}
+        <div className="bg-green-500 text-white p-6 rounded-2xl shadow-md w-64">
+
+          <h2 className="text-lg">
+            Remaining Varying Balance
+          </h2>
+
+          <h1 className="text-3xl font-bold mt-3">
+            ₹ {remainingBalance}
+          </h1>
+
+        </div>
+
+      </div>
 
       {/* MAIN CONTAINER */}
       <div className="flex gap-8 items-start flex-wrap">
@@ -161,10 +360,12 @@ const deleteExpense = (indexToDelete) => {
             </button>
 
           </div>
+
         </div>
 
         {/* RIGHT SIDE - EXPENSE LIST */}
-         <div className="bg-white p-6 rounded-2xl shadow-md w-full max-w-xl flex-1 h-[420px] flex flex-col min-h-0">
+        <div className="bg-white p-6 rounded-2xl shadow-md w-full max-w-xl flex-1 h-[420px] flex flex-col min-h-0">
+
           <h2 className="text-2xl font-bold mb-5">
             Expense List
           </h2>
@@ -176,37 +377,55 @@ const deleteExpense = (indexToDelete) => {
           ) : (
             <div className="space-y-4 overflow-y-auto flex-1 pr-2 min-h-0">
 
-              {varyingExpenses.map((varyingExpense, index) => (
-                <div 
-                key={index}
-                className="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
+              {varyingExpenses.map((varyingExpense) => (
 
-  <div>
-    <h3 className="font-medium">{varyingExpense.name}</h3>
-     <p className="text-sm text-gray-500">
-    {varyingExpense.createdAt &&
-      `📅 ${new Date(varyingExpense.createdAt).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })}`}
-  </p>
-  </div>
+                <div
+                  key={varyingExpense.id}
+                  className="flex justify-between items-center bg-gray-100 p-4 rounded-lg"
+                >
 
-  <div className="flex items-center gap-4">
+                  <div>
 
-    <h3 className="font-semibold">₹ {varyingExpense.amount}</h3>
+                    <h3 className="font-medium">
+                      {varyingExpense.name}
+                    </h3>
 
-    <button
-      onClick={() => deleteExpense(index)}
-      className="text-red-500 hover:text-red-700 text-xl"
-    >
-      🗑
-    </button>
+                    <p className="text-sm text-gray-500">
 
-  </div>
+                      {varyingExpense.createdAt &&
+                        `📅 ${new Date(
+                          varyingExpense.createdAt
+                        ).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
 
-</div>
+                      `}
+
+                    </p>
+
+                  </div>
+
+                  <div className="flex items-center gap-4">
+
+                    <h3 className="font-semibold">
+                      ₹ {varyingExpense.amount}
+                    </h3>
+
+                    <button
+                      onClick={() =>
+                        deleteExpense(varyingExpense.id)
+                      }
+                      className="text-red-500 hover:text-red-700 text-xl"
+                    >
+                      🗑
+                    </button>
+
+                  </div>
+
+                </div>
+
               ))}
 
             </div>
@@ -220,6 +439,7 @@ const deleteExpense = (indexToDelete) => {
         </div>
 
       </div>
+
     </div>
   );
 }

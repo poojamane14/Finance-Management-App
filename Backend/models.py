@@ -50,3 +50,102 @@ class Transaction(db.Model):
         "User",
         backref=db.backref("transactions", lazy=True)
     )
+
+class FinancialProfile(db.Model):
+    __tablename__ = "financial_profiles"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Link financial data to a user
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        unique=True,
+        nullable=False
+    )
+
+    # Financial information
+    monthly_income = db.Column(
+        db.Numeric(10, 2),
+        default=0
+    )
+
+    fixed_budget = db.Column(
+        db.Numeric(10, 2),
+        default=0
+    )
+
+    varying_budget = db.Column(
+        db.Numeric(10, 2),
+        default=0
+    )
+
+    savings_goal = db.Column(
+        db.Numeric(10, 2),
+        default=0
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        server_default=db.func.now()
+    )
+
+class MonthlyBudget(db.Model):
+    __tablename__ = "monthly_budgets"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Link monthly budget to a user
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=False
+    )
+
+    # Month and year
+    month = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    year = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    # Monthly financial targets
+    fixed_budget = db.Column(
+        db.Numeric(10, 2),
+        default=0
+    )
+
+    varying_budget = db.Column(
+        db.Numeric(10, 2),
+        default=0
+    )
+
+    savings_goal = db.Column(
+        db.Numeric(10, 2),
+        default=0
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        server_default=db.func.now()
+    )
+
+    # Relationship with User
+    user = db.relationship(
+        "User",
+        backref=db.backref("monthly_budgets", lazy=True)
+    )
+
+    # One budget record per user for each month/year
+    __table_args__ = (
+        db.UniqueConstraint(
+            "user_id",
+            "month",
+            "year",
+            name="unique_user_month_year"
+        ),
+    )

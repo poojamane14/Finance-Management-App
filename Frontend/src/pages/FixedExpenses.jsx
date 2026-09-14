@@ -8,19 +8,142 @@ function FixedExpenses() {
 
 
 useEffect(() => {
-  const savedBudget = localStorage.getItem("fixedBudget");
 
-  if (savedBudget) {
-    setBudget(JSON.parse(savedBudget));
+  const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
+  );
+
+  if (!currentUser) {
+    return;
   }
+
+  fetch(
+    `http://127.0.0.1:5000/api/financial-profile/${currentUser.id}`
+  )
+    .then((response) => response.json())
+    .then((data) => {
+
+      console.log("Financial profile:", data);
+
+      if (data.fixed_budget !== undefined) {
+        setBudget(data.fixed_budget);
+      }
+
+    })
+    .catch((error) => {
+
+      console.error(
+        "Error loading fixed budget:",
+        error
+      );
+
+    });
+
 }, []);
 
 useEffect(() => {
-  localStorage.setItem(
-    "fixedBudget",
-    JSON.stringify(fixedBudget)
+
+  const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
   );
+
+  if (!currentUser) {
+    return;
+  }
+
+  fetch(
+    "http://127.0.0.1:5000/api/financial-profile",
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        user_id: currentUser.id,
+        fixed_budget: fixedBudget,
+      }),
+    }
+  )
+    .then((response) => response.json())
+    .then((data) => {
+
+      console.log(
+        "Fixed budget saved:",
+        data
+      );
+
+    })
+    .catch((error) => {
+
+      console.error(
+        "Error saving fixed budget:",
+        error
+      );
+
+    });
+
 }, [fixedBudget]);
+
+const saveMonthlyFixedBudget = async (budgetAmount) => {
+  const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
+  );
+
+  if (!currentUser) {
+    return;
+  }
+
+  const now = new Date();
+
+  try {
+    const response = await fetch(
+      "http://127.0.0.1:5000/api/monthly-budget",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          user_id: currentUser.id,
+
+          // JavaScript months are 0-11,
+          // database months will be 1-12
+          month: now.getMonth() + 1,
+
+          year: now.getFullYear(),
+
+          fixed_budget: budgetAmount
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error(
+        "Monthly budget save error:",
+        data.error
+      );
+      return;
+    }
+
+    console.log(
+      "Monthly fixed budget saved:",
+      data
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Error saving monthly fixed budget:",
+      error
+    );
+  }
+};
 
 const addExpense = async () => {
 
@@ -103,7 +226,7 @@ const loadExpenses = async () => {
         id: expense.id,
         name: expense.merchant,
         amount: expense.amount,
-        createdAt: expense.created_at
+        createdAt: expense.transaction_date || expense.created_at
       }));
 
       setExpenses(formattedExpenses);
@@ -125,12 +248,38 @@ useEffect(() => {
   loadExpenses();
 }, []);
 
-const deleteExpense = (indexToDelete) => {
-  console.log("DELETE CLICKED:", indexToDelete);
+  const deleteExpense = async (expenseId) => {
 
-  setExpenses((prevExpenses) =>
-    prevExpenses.filter((_, index) => index !== indexToDelete)
-  );
+  try {
+
+    const response = await fetch(
+      `http://127.0.0.1:5000/api/fixed-expenses/${expenseId}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+      alert(data.error || "Failed to delete expense");
+      return;
+
+    }
+
+    alert("Expense deleted successfully!");
+
+    // Reload expenses from MySQL
+    loadExpenses();
+
+  } catch (error) {
+
+    console.error("Delete expense error:", error);
+
+    alert("Unable to connect to server.");
+
+  }
 };
 
   const totalFixedSpent = expenses.reduce(
@@ -154,13 +303,17 @@ const deleteExpense = (indexToDelete) => {
     Set Fixed Expense Budget
   </h2>
 
-  <input
-    type="number"
-    placeholder="Enter Budget Amount"
-    value={fixedBudget}
-    onChange={(e) => setBudget(Number(e.target.value))}
-    className="border p-3 rounded-lg outline-none w-full"
-  />
+  <input 
+  type="number" 
+  placeholder="Enter Budget Amount" 
+  value={fixedBudget} 
+  onChange={(e) => {
+    const value = Number(e.target.value);
+    setBudget(value);
+    saveMonthlyFixedBudget(value);
+  }} 
+  className="border p-3 rounded-lg outline-none w-full" 
+/>
 
 </div>
 
@@ -272,7 +425,7 @@ const deleteExpense = (indexToDelete) => {
     <h3 className="font-semibold">₹ {expense.amount}</h3>
 
     <button
-      onClick={() => deleteExpense(index)}
+      onClick={() => deleteExpense(expense.id)}
       className="text-red-500 hover:text-red-700 text-xl"
     >
       🗑

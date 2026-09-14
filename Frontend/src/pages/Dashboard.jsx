@@ -19,6 +19,8 @@ const [fixedExpenses, setFixedExpenses] = useState([]);
 const [varyingExpenses, setVaryingExpenses] = useState([]);
 const [savingsData, setSavingsData] = useState([]);
 
+const [profileLoaded, setProfileLoaded] = useState(false);
+
 useEffect(() => {
 
   const savedUser = JSON.parse(
@@ -29,6 +31,7 @@ useEffect(() => {
     return;
   }
 
+  // Load expenses from dashboard API
   fetch(
     `http://127.0.0.1:5000/api/dashboard/${savedUser.id}`
   )
@@ -49,14 +52,92 @@ useEffect(() => {
       );
     });
 
+
+  // Load income and budgets from MySQL
+  fetch(
+    `http://127.0.0.1:5000/api/financial-profile/${savedUser.id}`
+  )
+    .then((response) => response.json())
+    .then((data) => {
+
+      console.log("Financial profile:", data);
+
+      setIncome(data.monthly_income || 0);
+      setFixedBudget(data.fixed_budget || 0);
+      setVaryingBudget(data.varying_budget || 0);
+      setSavingsGoal(data.savings_goal || 0);
+
+      setProfileLoaded(true);
+
+    })
+    .catch((error) => {
+
+      console.error(
+        "Error loading financial profile:",
+        error
+      );
+
+    });
+
 }, []);
 
 useEffect(() => {
-  localStorage.setItem(
-    "monthlyIncome",
-    JSON.stringify(income)
+
+  if (!profileLoaded) {
+    return;
+  }
+
+  const savedUser = JSON.parse(
+    localStorage.getItem("currentUser")
   );
-}, [income]);
+
+  if (!savedUser) {
+    return;
+  }
+
+  fetch(
+    "http://127.0.0.1:5000/api/financial-profile",
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        user_id: savedUser.id,
+        monthly_income: income,
+        fixed_budget: fixedBudget,
+        varying_budget: varyingBudget,
+        savings_goal: savingsGoal,
+      }),
+    }
+  )
+    .then((response) => response.json())
+    .then((data) => {
+
+      console.log(
+        "Financial profile saved:",
+        data
+      );
+
+    })
+    .catch((error) => {
+
+      console.error(
+        "Error saving financial profile:",
+        error
+      );
+
+    });
+
+}, [
+  income,
+  fixedBudget,
+  varyingBudget,
+  savingsGoal,
+  profileLoaded
+]);
 
 const totalFixedSpent = fixedExpenses.reduce(
   (total, expense) => total + expense.amount,
